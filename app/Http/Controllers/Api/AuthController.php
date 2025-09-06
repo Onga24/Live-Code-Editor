@@ -241,5 +241,94 @@ public function login(Request $request)
     }
 
 
+
+
+public function forgotPassword(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'email' => 'required|email|exists:users,email',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(["status" => 400, "errors" => $validator->errors()], 400);
+    }
+
+    $user = User::where('email', $request->email)->first();
+
+    $recent = Otp::where('user_id', $user->id)
+                 ->where('type', 'forgot_password')
+                 ->where('created_at', '>', now()->subMinute())
+                 ->first();
+
+    if ($recent) {
+        return response()->json([
+            'status' => 429,
+            'message' => 'You requested an OTP recently. Please wait 1 minute before requesting again.'
+        ], 429);
+    }
+
+    $plainOtp = rand(100000, 999999);
+    $hashedOtp = Hash::make((string)$plainOtp);
+
+    Otp::create([
+        'user_id' => $user->id,
+        'otp_code' => $hashedOtp,
+        'type' => 'forgot_password',
+        'expires_at' => now()->addMinutes(5),
+    ]);
+
+    Mail::to($user->email)->send(new SendOtpMail($plainOtp, 'forgot_password'));
+
+    return response()->json([
+        'status' => 200,
+        'message' => 'OTP sent to your email for password reset.'
+    ]);
+}
+
+
+public function resetPassword(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'email' => 'required|email|exists:users,email',
+        'otp_code' => 'required|digits:6',
+        'password' => 'required|min:8|confirmed',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(["status" => 400, "errors" => $validator->errors()], 400);
+    }
+
+    $user = User::where('email', $request->email)->first();
+
+    $otp = Otp::where('user_id', $user->id)
+              ->where('type', 'forgot_password')
+              ->where('is_used', false)
+              ->latest()
+              ->first();
+
+    if (!$otp || now()->greaterThan($otp->expires_at)) {
+        return response()->json(['status' => 400, 'message' => 'OTP invalid or expired.'], 400);
+    }
+
+    if (!Hash::check((string)$request->otp_code, $otp->otp_code)) {
+        return response()->json(['status' => 400, 'message' => 'Invalid OTP.'], 400);
+    }
+
+    $user->password = Hash::make($request->password);
+    $user->save();
+
+    $otp->is_used = true;
+    $otp->save();
+
+    return response()->json([
+        'status' => 200,
+        'message' => 'Password reset successfully. You can now login with your new password.'
+    ]);
+}
+
+
+
+
+
     }
 

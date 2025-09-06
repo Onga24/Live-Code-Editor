@@ -22,7 +22,7 @@ class SendOtpMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct($otp, $type = 'register')
+    public function __construct($otp, $type)
     {
         $this->otp = $otp;
         $this->type = $type;
@@ -42,16 +42,32 @@ class SendOtpMail extends Mailable
     /**
      * Get the message content definition.
      */
+    // public function content(): Content
+    // {
+    //     return new Content(
+    //         view: 'emails.verifyotp',
+    //         with: [
+    //             'otp' => $this->otp,
+    //             'type' => $this->type,
+    //         ],
+    //     );
+    // }
+
     public function content(): Content
-    {
-        return new Content(
-            view: 'emails.verifyotp',
-            with: [
-                'otp' => $this->otp,
-                'type' => $this->type,
-            ],
-        );
-    }
+{
+    $view = $this->type === 'forgot_password'
+        ? 'emails.forgot'
+        : 'emails.verifyotp';
+
+    return new Content(
+        view: $view,
+        with: [
+            'otp' => $this->otp,
+            'type' => $this->type,
+        ],
+    );
+}
+
 
     /**
      * Get the attachments for the message.
