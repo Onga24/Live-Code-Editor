@@ -327,6 +327,118 @@ public function resetPassword(Request $request)
 }
 
 
+// public function updateProfile(Request $request)
+// {
+//     $user = auth()->user(); 
+
+//     $validator = Validator::make($request->all(), [
+//         'name' => 'nullable|string|min:3|max:50',
+//         'password' => 'nullable|string|min:8|confirmed',
+//     ]);
+
+//     if ($validator->fails()) {
+//         return response()->json(["status" => 400, "errors" => $validator->errors()], 400);
+//     }
+
+//     $updated = false;
+
+//     if ($request->filled('name')) {
+//         $user->name = $request->name;
+//         $updated = true;
+//     }
+
+//     if ($request->filled('password')) {
+//         $user->password = Hash::make($request->password);
+//         $updated = true;
+//     }
+
+//     if ($updated) {
+//         $user->save();
+
+//         return response()->json([
+//             "status" => 200,
+//             "message" => "Profile updated successfully.",
+//             "user" => $user
+//         ]);
+//     }
+
+//     return response()->json([
+//         "status" => 400,
+//         "message" => "No data provided to update."
+//     ], 400);
+// }
+
+
+
+
+
+public function updateProfile(Request $request)
+{
+    $user = auth()->user(); 
+
+    $validator = Validator::make($request->all(), [
+        'name' => 'nullable|string|min:3|max:50',
+        'password' => 'nullable|string|min:8|confirmed',
+        'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(["status" => 400, "errors" => $validator->errors()], 400);
+    }
+
+    $updated = false;
+
+    if ($request->filled('name')) {
+        $user->name = $request->name;
+        $updated = true;
+    }
+
+    if ($request->filled('password')) {
+        $user->password = Hash::make($request->password);
+        $updated = true;
+    }
+
+    if ($request->hasFile('profile_picture')) {
+        $path = $request->file('profile_picture')->store('profile_pictures', 'public');
+        $user->profile_picture = $path; 
+        $updated = true;
+    }
+
+    if ($updated) {
+        $user->save();
+
+        return response()->json([
+            "status" => 200,
+            "message" => "Profile updated successfully.",
+            "user" => [
+                "name" => $user->name,
+                "profile_picture" => $user->profile_picture 
+                    ? url('storage/' . $user->profile_picture) 
+                    : null,
+            ]
+        ]);
+    }
+
+    return response()->json([
+        "status" => 400,
+        "message" => "No data provided to update."
+    ], 400);
+}
+
+
+
+
+
+public function getMyProfile(Request $request)
+{
+    $user = auth()->user();
+
+    return response()->json([
+        "status" => 200,
+        "user" => $user
+    ]);
+}
+
 
 
 
