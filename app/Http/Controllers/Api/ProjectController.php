@@ -26,6 +26,18 @@ class ProjectController extends Controller
 }
 
 
+public function myProjects(Request $request)
+{
+    $user = $request->user();
+    $projects = $user->projects()->with('members')->get();
+
+    return response()->json([
+        'success' => true,
+        'projects' => $projects,
+    ]);
+}
+
+
         public function store(CreateProjectRequest $request)
     {
         $user = $request->user();
@@ -43,7 +55,10 @@ class ProjectController extends Controller
 
             $project->load('owner', 'members');
 
-            return response()->json($project, 201);
+            return response()->json([
+                'success' => true,
+                'project' => $project
+            ], 201);
         });
     }
 
@@ -69,7 +84,7 @@ class ProjectController extends Controller
 
 
         return response()->json([
-            'message' => 'Joined successfully',
+            'success' => true,
             'project' => $project,
         ], 200);
     }
