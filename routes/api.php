@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ProjectController;
+
 
 
 // Route::get('/user', function (Request $request) {
@@ -27,6 +29,11 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::post('logout', [AuthController::class, 'logout']);
 Route::post('/update-profile', [AuthController::class, 'updateProfile']);
 Route::get('/my-profile',[AuthController::class,'getMyProfile']);
+
+Route::post('projects', [ProjectController::class, 'store']);
+Route::post('projects/join', [ProjectController::class, 'joinByInvite']);
+
+
 });
 
 
