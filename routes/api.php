@@ -33,7 +33,7 @@ Route::get('/my-profile',[AuthController::class,'getMyProfile']);
 Route::post('projects', [ProjectController::class, 'store']);
 Route::post('projects/join', [ProjectController::class, 'joinByInvite']);
 
-Route::get('projects', [ProjectController::class, 'myProjects']);
+
 });
 
 
