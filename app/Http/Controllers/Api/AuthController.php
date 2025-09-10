@@ -22,7 +22,7 @@ class AuthController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
-            'email' => 'required|string|email|unique:users',
+            'email' => 'required|string|email',
             'password' => 'required|min:8',
             'confirm_password' => 'required|same:password'
         ], [
@@ -43,6 +43,33 @@ class AuthController extends Controller
                 "errors" => $validator->errors()
             ], 400);
         }
+
+
+
+    $user = User::where('email', $request->email)->first();
+
+    if ($user) {
+        if (is_null($user->email_verified_at)) {
+            // user exists but not verified -> resend OTP flow
+            return response()->json([
+                'status' => 'pending_verification',
+                'message' => 'User already registered but not verified. Please verify OTP.',
+                'data' => [
+                    'user_id' => $user->id,
+                    'email' => $user->email
+                ]
+            ], 200);
+        }
+
+        // user exists and verified
+        return response()->json([
+            'status' => 'error',
+            'message' => 'This email is already registered'
+        ], 400);
+    }
+
+
+
 
         $user = User::create([
             "name" => $request->name,
