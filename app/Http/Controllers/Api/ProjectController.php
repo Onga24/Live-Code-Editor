@@ -25,6 +25,20 @@ class ProjectController extends Controller
     return $code;
 }
 
+public function myProjects(Request $request)
+{
+    $user = $request->user();
+
+    $projects = $user->projects()
+        ->with(['members', 'owner'])
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'projects' => $projects
+    ]);
+}
+
 
         public function store(CreateProjectRequest $request)
     {
@@ -43,7 +57,10 @@ class ProjectController extends Controller
 
             $project->load('owner', 'members');
 
-            return response()->json($project, 201);
+            return response()->json([
+                'success' => true,
+                'project' => $project
+            ]);
         });
     }
 
@@ -56,19 +73,26 @@ class ProjectController extends Controller
 
         $exists = $project->members()->where('user_id', $user->id)->exists();
         if ($exists) {
-            return response()->json(['message' => 'Already joined'], 409);
+            return response()->json([
+                'sucess' => false,
+                'message' => 'Already joined'
+            ], 409);
         }
 
         try {
             $project->members()->attach($user->id, ['role' => 'member']);
         } catch (QueryException $e) {
-            return response()->json(['message' => 'Already joined'], 409);
+            return response()->json([
+                'success' => false,
+                'message' => 'Already joined'
+            ], 409);
         }
 
-        $project->load('members');
+        $project->load('owner', 'members');
 
 
         return response()->json([
+            'success' => true,
             'message' => 'Joined successfully',
             'project' => $project,
         ], 200);

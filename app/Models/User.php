@@ -55,4 +55,11 @@ class User extends Authenticatable
     return $this->hasMany(Otp::class);
 }
 
+public function projects()
+{
+    return $this->belongsToMany(Project::class, 'project_users')
+                ->withPivot('role')
+                ->withTimestamps();
+}
+
 }
