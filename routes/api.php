@@ -3,13 +3,9 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\ProjectController;
-
-
-
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');
+use Illuminate\Support\Facades\Broadcast;
 
 
 
@@ -29,11 +25,24 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::post('logout', [AuthController::class, 'logout']);
 Route::post('/update-profile', [AuthController::class, 'updateProfile']);
 Route::get('/my-profile',[AuthController::class,'getMyProfile']);
+Route::get('/my',[AuthController::class,'getMyProfile']);
 
 Route::post('projects', [ProjectController::class, 'store']);
 Route::post('projects/join', [ProjectController::class, 'joinByInvite']);
 
 Route::get('projects', [ProjectController::class, 'myProjects']);
+
+Route::get('/projects/{project}/messages', [ChatController::class, 'projectMessages']);
+Route::post('/projects/{project}/messages', [ChatController::class, 'storeProjectMessage']);
+
+Route::get('/messages', [ChatController::class, 'index']);
+Route::post('/messages', [ChatController::class, 'store']);
+
+Route::post('/cbroadcasting/auth', function (Request $request) {
+        return Broadcast::auth($request);
+    });
 });
+
+Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 
