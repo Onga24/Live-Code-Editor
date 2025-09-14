@@ -354,48 +354,6 @@ public function resetPassword(Request $request)
 }
 
 
-// public function updateProfile(Request $request)
-// {
-//     $user = auth()->user(); 
-
-//     $validator = Validator::make($request->all(), [
-//         'name' => 'nullable|string|min:3|max:50',
-//         'password' => 'nullable|string|min:8|confirmed',
-//     ]);
-
-//     if ($validator->fails()) {
-//         return response()->json(["status" => 400, "errors" => $validator->errors()], 400);
-//     }
-
-//     $updated = false;
-
-//     if ($request->filled('name')) {
-//         $user->name = $request->name;
-//         $updated = true;
-//     }
-
-//     if ($request->filled('password')) {
-//         $user->password = Hash::make($request->password);
-//         $updated = true;
-//     }
-
-//     if ($updated) {
-//         $user->save();
-
-//         return response()->json([
-//             "status" => 200,
-//             "message" => "Profile updated successfully.",
-//             "user" => $user
-//         ]);
-//     }
-
-//     return response()->json([
-//         "status" => 400,
-//         "message" => "No data provided to update."
-//     ], 400);
-// }
-
-
 
 
 
@@ -453,18 +411,35 @@ public function updateProfile(Request $request)
 }
 
 
-
-
-
 public function getMyProfile(Request $request)
 {
     $user = auth()->user();
 
     return response()->json([
         "status" => 200,
-        "user" => $user
+        "user" => [
+            "id" => $user->id,
+            "name" => $user->name,
+            "email" => $user->email,
+            "profile_picture" => $user->profile_picture 
+                ? url('storage/' . $user->profile_picture) 
+                : null,
+            "created_at" => $user->created_at,
+        ]
     ]);
 }
+
+
+
+// public function getMyProfile(Request $request)
+// {
+//     $user = auth()->user();
+
+//     return response()->json([
+//         "status" => 200,
+//         "user" => $user
+//     ]);
+// }
 
 
 
