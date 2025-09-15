@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\ProjectController;
 use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Support\Facades\Http;
 
 
 
@@ -22,27 +23,51 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 Route::middleware('auth:sanctum')->group(function () {
    
-Route::post('logout', [AuthController::class, 'logout']);
-Route::post('/update-profile', [AuthController::class, 'updateProfile']);
-Route::get('/my-profile',[AuthController::class,'getMyProfile']);
-Route::get('/my',[AuthController::class,'getMyProfile']);
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('/update-profile', [AuthController::class, 'updateProfile']);
+    Route::get('/my-profile',[AuthController::class,'getMyProfile']);
+    Route::get('/my',[AuthController::class,'getMyProfile']);
 
-Route::post('projects', [ProjectController::class, 'store']);
-Route::post('projects/join', [ProjectController::class, 'joinByInvite']);
+    Route::post('projects', [ProjectController::class, 'store']);
+    Route::post('projects/join', [ProjectController::class, 'joinByInvite']);
 
-Route::get('projects', [ProjectController::class, 'myProjects']);
+    Route::get('projects', [ProjectController::class, 'myProjects']);
 
-Route::get('/projects/{project}/messages', [ChatController::class, 'projectMessages']);
-Route::post('/projects/{project}/messages', [ChatController::class, 'storeProjectMessage']);
+    Route::get('/projects/{project}/messages', [ChatController::class, 'projectMessages']);
+    Route::post('/projects/{project}/messages', [ChatController::class, 'storeProjectMessage']);
 
-Route::get('/messages', [ChatController::class, 'index']);
-Route::post('/messages', [ChatController::class, 'store']);
+    Route::get('/messages', [ChatController::class, 'index']);
+    Route::post('/messages', [ChatController::class, 'store']);
 
-Route::post('/cbroadcasting/auth', function (Request $request) {
+    Route::post('/cbroadcasting/auth', function (Request $request) {
         return Broadcast::auth($request);
     });
+
 });
 
 Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
+Route::post('/chat', function (Request $request) {
+try {
+    $response = Http::withToken(env('OPENAI_API_KEY'))
+        ->post('https://api.openai.com/v1/responses', [
+            'model' => 'gpt-4o-mini',
+            'input' => $request->message,
+        ]);
+
+    if ($response->failed()) {
+        return response()->json([
+            'error' => 'OpenAI API failed',
+            'details' => $response->json(),
+        ], 500);
+    }
+
+    return $response->json();
+} catch (\Throwable $e) {
+    return response()->json([
+        'error' => 'Server exception',
+        'message' => $e->getMessage(),
+    ], 500);
+}
+});
 
