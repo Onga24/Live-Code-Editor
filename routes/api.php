@@ -4,6 +4,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminProjectController;
+
 
 
 
@@ -33,8 +36,34 @@ Route::get('/me', [AuthController::class, 'getMyProfile']);
 
 Route::post('projects', [ProjectController::class, 'store']);
 Route::post('projects/join', [ProjectController::class, 'joinByInvite']);
+Route::get('projects', [ProjectController::class, 'myprojects']);
+
+
 
 
 });
+
+
+Route::prefix('admin')->middleware(['auth:sanctum','is_admin'])->group(function () {
+    // Users
+    Route::get('users', [AdminUserController::class, 'index']);
+    Route::get('users/{user}', [AdminUserController::class, 'show']);
+    Route::put('users/{user}', [AdminUserController::class, 'update']); 
+    Route::delete('users/{user}', [AdminUserController::class, 'destroy']); 
+    Route::post('users/{id}/restore', [AdminUserController::class, 'restore']);
+    Route::delete('users/{id}/force', [AdminUserController::class, 'forceDelete']);
+    Route::get('dashboard', [AdminUserController::class, 'stats']);
+
+
+
+    // Projects
+    Route::get('projects', [AdminProjectController::class, 'index']);
+    Route::get('projects/{project}', [AdminProjectController::class, 'show']);
+    Route::put('projects/{project}', [AdminProjectController::class, 'update']);
+    Route::delete('projects/{project}', [AdminProjectController::class, 'destroy']); 
+    Route::post('projects/{id}/restore', [AdminProjectController::class, 'restore']);
+    Route::delete('projects/{id}/force', [AdminProjectController::class, 'forceDelete']);
+});
+
 
 

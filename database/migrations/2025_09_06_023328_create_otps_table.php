@@ -18,7 +18,8 @@ return new class extends Migration
             $table->timestamp('expires_at');
             $table->boolean('is_used')->default(false);
             $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
             $table->timestamps();
         });
     }
