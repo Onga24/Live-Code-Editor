@@ -40,6 +40,18 @@ public function myProjects(Request $request)
 }
 
 
+public function myProjects(Request $request)
+{
+    $user = $request->user();
+    $projects = $user->projects()->with('members')->get();
+
+    return response()->json([
+        'success' => true,
+        'projects' => $projects,
+    ]);
+}
+
+
         public function store(CreateProjectRequest $request)
     {
         $user = $request->user();
@@ -60,7 +72,8 @@ public function myProjects(Request $request)
             return response()->json([
                 'success' => true,
                 'project' => $project
-            ]);
+            ], 201);
+
         });
     }
 
