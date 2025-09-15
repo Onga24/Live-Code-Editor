@@ -40,6 +40,7 @@ Route::get('projects', [ProjectController::class, 'myprojects']);
 
 
 
+Route::get('projects', [ProjectController::class, 'myprojects']);
 
 });
 
