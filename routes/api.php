@@ -39,13 +39,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/messages', [ChatController::class, 'index']);
     Route::post('/messages', [ChatController::class, 'store']);
 
-    Route::post('/cbroadcasting/auth', function (Request $request) {
-        return Broadcast::auth($request);
-    });
+    // Route::post('/broadcasting/auth', function (Request $request) {
+    //     return Broadcast::auth($request);
+    // });
 
+    Broadcast::routes(['middleware' => ['auth:sanctum']]);
 });
 
-Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
 Route::post('/chat', function (Request $request) {
 try {
