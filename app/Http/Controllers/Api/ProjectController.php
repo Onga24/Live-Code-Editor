@@ -109,6 +109,10 @@ public function myProjects(Request $request)
             'project' => $project,
         ], 200);
     }
+public function files()
+{
+    return $this->hasMany(ProjectFile::class);
+}
 
     // 🟢 تعديل مشروع
     public function update(Request $request, Project $project)

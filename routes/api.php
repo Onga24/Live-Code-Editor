@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\FileController;
+use App\Http\Controllers\Api\CodeAssistance;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\Admin\AdminUserController;
@@ -46,6 +48,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/projects/{project}/messages', [ChatController::class, 'storeProjectMessage']);
     Route::get('/messages', [ChatController::class, 'index']);
     Route::post('/messages', [ChatController::class, 'store']);
+    Route::get('projects', [ProjectController::class, 'myprojects']);
+    // Your existing routes...
+    
+    // Project file routes
+    Route::get('/projects/{project}/files', [FileController::class, 'getProjectFiles']);
+    Route::post('/projects/{project}/files', [FileController::class, 'saveProjectFiles']);
+    // Route::post('/projects/{projectId}/files', [FileController::class, 'saveProjectFiles']);    
+    // Alternative routes if needed
+
+    Route::post('/projects/{project}/save', [FileController::class, 'saveProject']);
+    Route::get('/projects/{project}/show', [FileController::class, 'show']);
+    Route::post('/projects/{project}/files/upload', [FileController::class, 'store']);
+    Route::delete('/projects/{project}/files/{file}', [FileController::class, 'destroy']);
+    Route::delete('/projects/{project}/files', [FileController::class, 'destroyMultiple']);
+
+    Route::post('/ai/code-assist', [CodeAssistance::class, 'codeAssist']);
 });
 
 // Broadcasting authentication route - يجب أن يكون منفصل وخارج middleware group
@@ -92,6 +110,7 @@ Route::post('/chat', function (Request $request) {
 
 
 
+
 Route::prefix('admin')->middleware(['auth:sanctum','is_admin'])->group(function () {
     // Users
     Route::get('users', [AdminUserController::class, 'index']);
@@ -111,7 +130,6 @@ Route::prefix('admin')->middleware(['auth:sanctum','is_admin'])->group(function 
     Route::delete('projects/{project}', [AdminProjectController::class, 'destroy']); 
     Route::post('projects/{id}/restore', [AdminProjectController::class, 'restore']);
     Route::delete('projects/{id}/force', [AdminProjectController::class, 'forceDelete']);
-});
 
 
 
