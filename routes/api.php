@@ -7,6 +7,15 @@ use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\ProjectController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\Admin\AdminUserController;
+use App\Http\Controllers\Admin\AdminProjectController;
+
+
+
+
+Route::get('/user', function (Request $request) {
+    return $request->user();
+})->middleware('auth:sanctum');
 
 
 
@@ -23,6 +32,7 @@ Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
 Route::middleware('auth:sanctum')->group(function () {
    
+
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('/update-profile', [AuthController::class, 'updateProfile']);
     Route::get('/my-profile',[AuthController::class,'getMyProfile']);
@@ -43,7 +53,6 @@ Route::middleware('auth:sanctum')->group(function () {
         return Broadcast::auth($request);
     });
 
-});
 
 Broadcast::routes(['middleware' => ['auth:sanctum']]);
 
@@ -70,4 +79,27 @@ try {
     ], 500);
 }
 });
+
+Route::prefix('admin')->middleware(['auth:sanctum','is_admin'])->group(function () {
+    // Users
+    Route::get('users', [AdminUserController::class, 'index']);
+    Route::get('users/{user}', [AdminUserController::class, 'show']);
+    Route::put('users/{user}', [AdminUserController::class, 'update']); 
+    Route::delete('users/{user}', [AdminUserController::class, 'destroy']); 
+    Route::post('users/{id}/restore', [AdminUserController::class, 'restore']);
+    Route::delete('users/{id}/force', [AdminUserController::class, 'forceDelete']);
+    Route::get('dashboard', [AdminUserController::class, 'stats']);
+
+
+
+    // Projects
+    Route::get('projects', [AdminProjectController::class, 'index']);
+    Route::get('projects/{project}', [AdminProjectController::class, 'show']);
+    Route::put('projects/{project}', [AdminProjectController::class, 'update']);
+    Route::delete('projects/{project}', [AdminProjectController::class, 'destroy']); 
+    Route::post('projects/{id}/restore', [AdminProjectController::class, 'restore']);
+    Route::delete('projects/{id}/force', [AdminProjectController::class, 'forceDelete']);
+});
+
+
 
