@@ -248,6 +248,7 @@ public function login(Request $request)
         return response()->json([
             'status' => 200,
             'message' => 'Login successful',
+            'role' => $user->role, 
             'data' => $user,
             'token' => $token
         ], 200);
@@ -397,6 +398,7 @@ public function updateProfile(Request $request)
             "message" => "Profile updated successfully.",
             "user" => [
                 "name" => $user->name,
+                'role' => $user->role, 
                 "profile_picture" => $user->profile_picture 
                     ? url('storage/' . $user->profile_picture) 
                     : null,
@@ -421,6 +423,7 @@ public function getMyProfile(Request $request)
             "id" => $user->id,
             "name" => $user->name,
             "email" => $user->email,
+            'role' => $user->role, 
             "profile_picture" => $user->profile_picture 
                 ? url('storage/' . $user->profile_picture) 
                 : null,

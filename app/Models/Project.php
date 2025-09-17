@@ -5,9 +5,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+
 class Project extends Model
 {
-    use HasFactory;
+    use HasFactory, softDeletes;
 
         protected $fillable = [
         'name',
@@ -27,6 +30,9 @@ class Project extends Model
                     ->withTimestamps();
     }
 
-
+    public function messages()
+    {
+        return $this->hasMany(Message::class);
+    }
 
 }

@@ -8,12 +8,14 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Otp;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, softDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -24,7 +26,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role'
+        'role',
+        'is_active',
     ];
 
     /**
@@ -55,11 +58,16 @@ class User extends Authenticatable
     return $this->hasMany(Otp::class);
 }
 
-public function projects()
-{
-    return $this->belongsToMany(Project::class, 'project_users')
-                ->withPivot('role')
-                ->withTimestamps();
-}
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+
+        public function projects()
+    {
+        return $this->belongsToMany(Project::class, 'project_users')->withPivot('role')->withTimestamps();
+    }
+
 
 }
