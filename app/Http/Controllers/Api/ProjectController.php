@@ -23,8 +23,8 @@ class ProjectController extends Controller
     } while (Project::where('invite_code', $code)->exists());
 
     return $code;
-}
 
+}
 public function myProjects(Request $request)
 {
     $user = $request->user();
@@ -97,6 +97,9 @@ public function myProjects(Request $request)
             'project' => $project,
         ], 200);
     }
-
+public function files()
+{
+    return $this->hasMany(ProjectFile::class);
+}
 
 }
