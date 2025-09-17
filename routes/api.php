@@ -8,66 +8,73 @@ use App\Http\Controllers\Api\ProjectController;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Http;
 
-
-
+// Public routes
 Route::post('register', [AuthController::class, 'register']);
 Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
 Route::post('/resend-otp', [AuthController::class, 'resendOtp']);
-
 Route::post('login', [AuthController::class, 'login']);
-
 Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
-
-
+// Protected routes
 Route::middleware('auth:sanctum')->group(function () {
-   
+    // User routes
     Route::post('logout', [AuthController::class, 'logout']);
     Route::post('/update-profile', [AuthController::class, 'updateProfile']);
-    Route::get('/my-profile',[AuthController::class,'getMyProfile']);
-    Route::get('/my',[AuthController::class,'getMyProfile']);
+    Route::get('/my-profile', [AuthController::class, 'getMyProfile']);
+    Route::get('/my', [AuthController::class, 'getMyProfile']);
 
+    // Project routes
     Route::post('projects', [ProjectController::class, 'store']);
     Route::post('projects/join', [ProjectController::class, 'joinByInvite']);
-
     Route::get('projects', [ProjectController::class, 'myProjects']);
+    Route::put('projects/{project}', [ProjectController::class, 'update']);
+    // Route::patch('projects/{project}', [ProjectController::class, 'update']); // اختياري
+    Route::delete('projects/{project}', [ProjectController::class, 'destroy']);
 
+    // Chat routes
     Route::get('/projects/{project}/messages', [ChatController::class, 'projectMessages']);
     Route::post('/projects/{project}/messages', [ChatController::class, 'storeProjectMessage']);
-
     Route::get('/messages', [ChatController::class, 'index']);
     Route::post('/messages', [ChatController::class, 'store']);
-
-    // Route::post('/broadcasting/auth', function (Request $request) {
-    //     return Broadcast::auth($request);
-    // });
-
-    Broadcast::routes(['middleware' => ['auth:sanctum']]);
 });
 
+// Broadcasting authentication route - يجب أن يكون منفصل وخارج middleware group
+Route::middleware('auth:sanctum')->post('/broadcasting/auth', function (Request $request) {
+    try {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['error' => 'User not authenticated'], 401);
+        }
+        
+        return Broadcast::auth($request);
+    } catch (\Exception $e) {
+        \Log::error('Broadcasting auth error: ' . $e->getMessage());
+        return response()->json(['error' => 'Broadcasting auth failed'], 403);
+    }
+});
 
+// OpenAI route
 Route::post('/chat', function (Request $request) {
-try {
-    $response = Http::withToken(env('OPENAI_API_KEY'))
-        ->post('https://api.openai.com/v1/responses', [
-            'model' => 'gpt-4o-mini',
-            'input' => $request->message,
-        ]);
+    try {
+        $response = Http::withToken(env('OPENAI_API_KEY'))
+            ->post('https://api.openai.com/v1/responses', [
+                'model' => 'gpt-4o-mini',
+                'input' => $request->message,
+            ]);
 
-    if ($response->failed()) {
+        if ($response->failed()) {
+            return response()->json([
+                'error' => 'OpenAI API failed',
+                'details' => $response->json(),
+            ], 500);
+        }
+
+        return $response->json();
+    } catch (\Throwable $e) {
         return response()->json([
-            'error' => 'OpenAI API failed',
-            'details' => $response->json(),
+            'error' => 'Server exception',
+            'message' => $e->getMessage(),
         ], 500);
     }
-
-    return $response->json();
-} catch (\Throwable $e) {
-    return response()->json([
-        'error' => 'Server exception',
-        'message' => $e->getMessage(),
-    ], 500);
-}
 });
-

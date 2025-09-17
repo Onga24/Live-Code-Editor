@@ -1,3 +1,4 @@
+<?php
 namespace App\Http\Controllers\Api;
 
 use App\Events\MessageSent;
@@ -36,7 +37,7 @@ class ChatController extends Controller
         ]);
 
         $message->load('user');
-
+        // event(new MessageSent($message));
         broadcast(new MessageSent($message))->toOthers();
 
         return response()->json([
@@ -76,7 +77,7 @@ class ChatController extends Controller
         ]);
 
         $message->load('user');
-
+        // event(new MessageSent($message));
         broadcast(new MessageSent($message))->toOthers();
 
         return response()->json([
