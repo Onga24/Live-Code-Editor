@@ -25,7 +25,7 @@ class Project extends Model
 
         public function members()
     {
-        return $this->belongsToMany(User::class, 'project_users')
+        return $this->belongsToMany(User::class, 'project_users','project_id', 'user_id')
                     ->withPivot('role')
                     ->withTimestamps();
     }
@@ -34,5 +34,9 @@ class Project extends Model
     {
         return $this->hasMany(Message::class);
     }
-
+public function allUsers()
+{
+    return $this->belongsToMany(User::class, 'project_users', 'project_id', 'user_id')
+                ->withPivot('role');
+}
 }

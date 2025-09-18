@@ -63,7 +63,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/projects/{project}/files/{file}', [FileController::class, 'destroy']);
     Route::delete('/projects/{project}/files', [FileController::class, 'destroyMultiple']);
 
-    Route::post('/ai/code-assist', [CodeAssistance::class, 'codeAssist']);
 });
 
 // Broadcasting authentication route - يجب أن يكون منفصل وخارج middleware group
@@ -132,4 +131,4 @@ Route::prefix('admin')->middleware(['auth:sanctum','is_admin'])->group(function 
     Route::delete('projects/{id}/force', [AdminProjectController::class, 'forceDelete']);
 
 
-
+});

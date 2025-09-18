@@ -22,36 +22,59 @@ class ProjectController extends Controller
 
         return $code;
     }
+// public function myProjects(Request $request)
+// {
+//     $user = $request->user();
+
+//     $projects = $user->projects()
+//         ->with(['members', 'owner'])
+//         ->get();
+
+//     return response()->json([
+//         'success' => true,
+//         'projects' => $projects
+//     ]);
+// }
 public function myProjects(Request $request)
 {
     $user = $request->user();
 
     $projects = $user->projects()
-        ->with(['members', 'owner'])
+        ->with('allUsers') // Use the new relationship that includes the owner
         ->get();
 
     return response()->json([
         'success' => true,
-        'projects' => $projects
+        'projects' => $projects,
     ]);
 }
 
 
-    public function myProjects(Request $request)
-    {
-        \Log::info('myProjects user:', [$request->user()]);
-        $user = $request->user();
+    // public function myProjects(Request $request)
+    // {
+    //     \Log::info('myProjects user:', [$request->user()]);
+    //     $user = $request->user();
 
-        if (!$user) {
-            return response()->json(['error' => 'Unauthenticated'], 401);
-        }
+    //     if (!$user) {
+    //         return response()->json(['error' => 'Unauthenticated'], 401);
+    //     }
 
-        $projects = $user->projects()->with('members')->get();
-        return response()->json([
-            'success' => true,
-            'projects' => $projects,
-        ]);
-    }
+    //     $projects = $user->projects()->with('members')->get();
+    //     return response()->json([
+    //         'success' => true,
+    //         'projects' => $projects,
+    //     ]);
+    // }
+    // In your Project controller
+public function getProject($id)
+{
+    $project = Project::with('members')->findOrFail($id);
+
+    return response()->json([
+        'status' => 200,
+        'project' => $project,
+    ]);
+}
 
     public function store(CreateProjectRequest $request)
     {
