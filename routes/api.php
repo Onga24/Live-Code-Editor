@@ -83,12 +83,44 @@ Route::middleware('auth:sanctum')->post('/broadcasting/auth', function (Request 
 
 
 // OpenAI route
+// Route::post('/chat', function (Request $request) {
+//     try {
+//         $response = Http::withToken(env('OPENAI_API_KEY'))
+//             ->post('https://api.openai.com/v1/responses', [
+//                 'model' => 'gpt-4o-mini',
+//                 'input' => $request->message,
+//             ]);
+
+//         if ($response->failed()) {
+//             return response()->json([
+//                 'error' => 'OpenAI API failed',
+//                 'details' => $response->json(),
+//             ], 500);
+//         }
+
+//         return $response->json();
+//     } catch (\Throwable $e) {
+//         return response()->json([
+//             'error' => 'Server exception',
+//             'message' => $e->getMessage(),
+//         ], 500);
+//     }
+// });
+
+// OpenAI route - Fixed endpoint
 Route::post('/chat', function (Request $request) {
     try {
         $response = Http::withToken(env('OPENAI_API_KEY'))
-            ->post('https://api.openai.com/v1/responses', [
+            ->post('https://api.openai.com/v1/chat/completions', [  // Fixed: was /responses
                 'model' => 'gpt-4o-mini',
-                'input' => $request->message,
+                'messages' => [  // Fixed: OpenAI expects 'messages' array, not 'input'
+                    [
+                        'role' => 'user',
+                        'content' => $request->message
+                    ]
+                ],
+                'max_tokens' => 1000,
+                'temperature' => 0.7,
             ]);
 
         if ($response->failed()) {
@@ -106,7 +138,6 @@ Route::post('/chat', function (Request $request) {
         ], 500);
     }
 });
-
 
 
 
