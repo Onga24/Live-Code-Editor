@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminProjectController;
+use App\Http\Controllers\Api\ExecutionController;
+
 
 
 
@@ -37,6 +39,15 @@ Route::get('/me', [AuthController::class, 'getMyProfile']);
 Route::post('projects', [ProjectController::class, 'store']);
 Route::post('projects/join', [ProjectController::class, 'joinByInvite']);
 Route::get('projects', [ProjectController::class, 'myprojects']);
+
+Route::post('/projects/{project}/save-code', [ProjectController::class, 'saveCode']);
+Route::get('/projects/{project}', [ProjectController::class, 'show']);
+
+
+Route::post('/execute', [ExecutionController::class, 'execute'])
+     ->middleware(['throttle:6,1']); 
+
+
 
 
 

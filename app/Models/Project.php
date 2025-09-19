@@ -16,6 +16,7 @@ class Project extends Model
         'name',
         'owner_id',
         'invite_code',
+        'code'
     ];
 
         public function owner()

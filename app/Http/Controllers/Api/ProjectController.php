@@ -89,5 +89,38 @@ public function myProjects(Request $request)
         ], 200);
     }
 
+    public function saveCode(Request $request, Project $project)
+{
+    $request->validate([
+        'code' => 'required|string',
+    ]);
+
+    if (!$project->members()->where('user_id', $request->user()->id)->exists()) {
+        return response()->json(['message' => 'Not authorized'], 403);
+    }
+
+    $project->update([
+        'code' => $request->input('code')
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Code saved successfully'
+    ]);
+}
+
+public function show(Project $project, Request $request)
+{
+    if (!$project->members()->where('user_id', $request->user()->id)->exists()) {
+        return response()->json(['message' => 'Not authorized'], 403);
+    }
+
+    $project->load('members', 'owner'); 
+    return response()->json([
+        'success' => true,
+        'project' => $project
+    ]);
+}
+
 
 }
