@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminProjectController;
 
+
+
+
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
@@ -37,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('projects/join', [ProjectController::class, 'joinByInvite']);
     Route::get('projects', [ProjectController::class, 'myProjects']);
     Route::put('projects/{project}', [ProjectController::class, 'update']);
+    // Route::patch('projects/{project}', [ProjectController::class, 'update']); // اختياري
     Route::delete('projects/{project}', [ProjectController::class, 'destroy']);
 
     // Chat routes
@@ -44,19 +48,28 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/projects/{project}/messages', [ChatController::class, 'storeProjectMessage']);
     Route::get('/messages', [ChatController::class, 'index']);
     Route::post('/messages', [ChatController::class, 'store']);
+    Route::get('projects', [ProjectController::class, 'myprojects']);
+    // Your existing routes...
     
-    // Project file routes (existing)
+    // Project file routes
     Route::get('/projects/{project}/files', [FileController::class, 'getProjectFiles']);
     Route::post('/projects/{project}/files', [FileController::class, 'saveProjectFiles']);
+    // Route::post('/projects/{projectId}/files', [FileController::class, 'saveProjectFiles']);    
+    // Alternative routes if needed
+
     Route::post('/projects/{project}/save', [FileController::class, 'saveProject']);
     Route::get('/projects/{project}/show', [FileController::class, 'show']);
     Route::post('/projects/{project}/files/upload', [FileController::class, 'store']);
     Route::delete('/projects/{project}/files/{file}', [FileController::class, 'destroy']);
     Route::delete('/projects/{project}/files', [FileController::class, 'destroyMultiple']);
 
-    // ✅ NEW: Real-time file update routes
+     // ✅ إضافة route للتحديث الفوري للملفات
     Route::patch('/projects/{project}/files/{file}/content', [FileController::class, 'updateFileContent']);
     
+    // ✅ routes أخرى للتحديث الفوري
+    Route::post('/projects/{project}/files/{file}/typing-start', [FileController::class, 'startTyping']);
+    Route::post('/projects/{project}/files/{file}/typing-stop', [FileController::class, 'stopTyping']);
+
     // ✅ Real-time presence routes
     Route::post('/projects/{project}/join-session', [FileController::class, 'joinSession']);
     Route::post('/projects/{project}/leave-session', [FileController::class, 'leaveSession']);
@@ -81,13 +94,39 @@ Route::middleware('auth:sanctum')->post('/broadcasting/auth', function (Request 
     }
 });
 
+
+// OpenAI route
+// Route::post('/chat', function (Request $request) {
+//     try {
+//         $response = Http::withToken(env('OPENAI_API_KEY'))
+//             ->post('https://api.openai.com/v1/responses', [
+//                 'model' => 'gpt-4o-mini',
+//                 'input' => $request->message,
+//             ]);
+
+//         if ($response->failed()) {
+//             return response()->json([
+//                 'error' => 'OpenAI API failed',
+//                 'details' => $response->json(),
+//             ], 500);
+//         }
+
+//         return $response->json();
+//     } catch (\Throwable $e) {
+//         return response()->json([
+//             'error' => 'Server exception',
+//             'message' => $e->getMessage(),
+//         ], 500);
+//     }
+// });
+
 // OpenAI route - Fixed endpoint
 Route::post('/chat', function (Request $request) {
     try {
         $response = Http::withToken(env('OPENAI_API_KEY'))
-            ->post('https://api.openai.com/v1/chat/completions', [
+            ->post('https://api.openai.com/v1/chat/completions', [  // Fixed: was /responses
                 'model' => 'gpt-4o-mini',
-                'messages' => [
+                'messages' => [  // Fixed: OpenAI expects 'messages' array, not 'input'
                     [
                         'role' => 'user',
                         'content' => $request->message
@@ -113,6 +152,8 @@ Route::post('/chat', function (Request $request) {
     }
 });
 
+
+
 Route::prefix('admin')->middleware(['auth:sanctum','is_admin'])->group(function () {
     // Users
     Route::get('users', [AdminUserController::class, 'index']);
@@ -123,6 +164,8 @@ Route::prefix('admin')->middleware(['auth:sanctum','is_admin'])->group(function 
     Route::delete('users/{id}/force', [AdminUserController::class, 'forceDelete']);
     Route::get('dashboard', [AdminUserController::class, 'stats']);
 
+
+
     // Projects
     Route::get('projects', [AdminProjectController::class, 'index']);
     Route::get('projects/{project}', [AdminProjectController::class, 'show']);
@@ -130,4 +173,11 @@ Route::prefix('admin')->middleware(['auth:sanctum','is_admin'])->group(function 
     Route::delete('projects/{project}', [AdminProjectController::class, 'destroy']); 
     Route::post('projects/{id}/restore', [AdminProjectController::class, 'restore']);
     Route::delete('projects/{id}/force', [AdminProjectController::class, 'forceDelete']);
+
+
 });
+
+
+
+
+
