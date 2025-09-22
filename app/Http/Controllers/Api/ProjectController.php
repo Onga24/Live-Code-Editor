@@ -123,4 +123,47 @@ public function show(Project $project, Request $request)
 }
 
 
+public function update(Request $request, Project $project)
+{
+    $user = $request->user();
+
+    // Only owner can edit
+    if ($project->owner_id !== $user->id) {
+        return response()->json(['message' => 'Not authorized'], 403);
+    }
+
+    $request->validate([
+        'name' => 'required|string|max:255',
+    ]);
+
+    $project->update([
+        'name' => $request->input('name'),
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'project' => $project
+    ]);
+}
+
+
+public function destroy(Request $request, Project $project)
+{
+    $user = $request->user();
+
+    // Only owner can delete
+    if ($project->owner_id !== $user->id) {
+        return response()->json(['message' => 'Not authorized'], 403);
+    }
+
+    $project->delete(); 
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Project deleted successfully'
+    ]);
+}
+
+
+
 }

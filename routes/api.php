@@ -7,6 +7,13 @@ use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\AdminProjectController;
 use App\Http\Controllers\Api\ExecutionController;
+use App\Http\Controllers\Api\MessageController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\FriendController;
+use App\Http\Controllers\Api\ConversationMessageController;
+use App\Http\Controllers\Api\AIController;
+
+
 
 
 
@@ -39,15 +46,30 @@ Route::get('/me', [AuthController::class, 'getMyProfile']);
 Route::post('projects', [ProjectController::class, 'store']);
 Route::post('projects/join', [ProjectController::class, 'joinByInvite']);
 Route::get('projects', [ProjectController::class, 'myprojects']);
+    Route::put('/projects/{project}', [ProjectController::class, 'update']);   // edit
+    Route::delete('/projects/{project}', [ProjectController::class, 'destroy']); // soft delete
+
 
 Route::post('/projects/{project}/save-code', [ProjectController::class, 'saveCode']);
 Route::get('/projects/{project}', [ProjectController::class, 'show']);
+
+Route::post('/ai-autocomplete', [AIController::class, 'autocomplete']);
 
 
 Route::post('/execute', [ExecutionController::class, 'execute'])
      ->middleware(['throttle:6,1']); 
 
 
+
+    Route::get('/projects/{project}/messages', [MessageController::class, 'index']);
+    Route::post('/projects/{project}/messages', [MessageController::class, 'store']);
+
+
+
+    Route::get('/users/search', [UserController::class,'search']);
+    Route::post('/friends', [FriendController::class,'store']);
+    Route::get('/conversations/{conversation}', [ConversationController::class,'show']);
+    Route::post('/conversations/{conversation}/messages', [ConversationMessageController::class,'store']);
 
 
 

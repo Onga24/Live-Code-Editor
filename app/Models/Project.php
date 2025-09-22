@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+use App\Models\Message; 
+
+
+
+
 
 class Project extends Model
 {
@@ -31,6 +36,10 @@ class Project extends Model
                     ->withTimestamps();
     }
 
+public function messages()
+{
+    return $this->hasMany(Message::class);
+}
 
 
 }

@@ -70,4 +70,16 @@ class User extends Authenticatable
     }
 
 
+    public function conversations() {
+    return $this->belongsToMany(\App\Models\Conversation::class,'conversation_user')->withTimestamps();
+}
+public function friendshipsRequested() {
+    return $this->hasMany(\App\Models\Friendship::class,'requester_id');
+}
+public function friendshipsReceived() {
+    return $this->hasMany(\App\Models\Friendship::class,'requested_id');
+}
+
+
+
 }
