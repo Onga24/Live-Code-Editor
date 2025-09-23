@@ -78,6 +78,9 @@ io.on('connection', (socket) => {
 
 
 
+socket.on('sendDirectMessage', ({ room, from, to, message }) => {
+    io.to(room).emit('receiveDirectMessage', { from, message });
+});
 
 
 
